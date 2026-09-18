@@ -1,0 +1,519 @@
+/*
+ * TTS client theme: minimal black / gray.
+ *
+ * One neutral ramp carries the whole interface. Emphasis comes from lightness,
+ * not hue: the single filled action is near-white on near-black, and server
+ * status is read from the tally lamp (hollow = closed, mid-gray =
+ * starting/closing, green + glow = running, red = failed) plus its text.
+ *
+ * Tiers:
+ *   primitives  -gray-*        values only, never used by a component
+ *   semantic    -color-*       roles, the only tier components reference
+ */
+
+.root {
+    /* ---- primitives (OKLCH lightness, chroma 0) ---- */
+    -gray-180: #121212;   /* L 0.18 */
+    -gray-240: #1f1f1f;   /* L 0.24 */
+    -gray-300: #2e2e2e;   /* L 0.30 */
+    -gray-360: #3d3d3d;   /* L 0.36 */
+    -gray-480: #5e5e5e;   /* L 0.48 */
+    -gray-550: #717171;   /* L 0.55 */
+    -gray-620: #868686;   /* L 0.62 */
+    -gray-660: #929292;   /* L 0.66 */
+    -gray-780: #b7b7b7;   /* L 0.78 */
+    -gray-840: #cacaca;   /* L 0.84 */
+    -gray-920: #e4e4e4;   /* L 0.92 */
+    -gray-950: #eeeeee;   /* L 0.95 */
+    -gray-960: #f2f2f2;   /* L 0.96 */
+    -gray-980: #f8f8f8;   /* L 0.98 */
+    -gray-150: #0b0b0b;   /* L 0.15 */
+
+    /* ---- semantic: surfaces ---- */
+    -color-bg:               -gray-150;
+    -color-bg-glow:          -gray-300;
+    -color-surface:          -gray-240;
+    -color-shadow:           rgba(0, 0, 0, 0.55);
+    -color-surface-hover:    -gray-300;
+    -color-surface-selected: -gray-360;
+
+    /* ---- semantic: lines ---- */
+    -color-border:           -gray-480;
+    -color-border-strong:    -gray-550;
+    -color-focus-ring:       -gray-950;
+
+    /* ---- semantic: text ---- */
+    -color-text:             -gray-950;
+    -color-text-muted:       -gray-780;
+    -color-text-placeholder: -gray-620;
+    -color-text-selection:   -gray-360;
+
+    /* ---- semantic: the one filled action ---- */
+    -color-primary-fill:     -gray-920;
+    -color-primary-hover:    -gray-980;
+    -color-primary-pressed:  -gray-840;
+    -color-primary-label:    -gray-150;
+
+    /* ---- semantic: tally lamp ---- */
+    /* Running and failed are the two states that earn a hue: a green and a red that sit in the dark ramp. */
+    -color-lamp-running:     #3fb950;
+    -color-text-running:     #7ee787;
+    -color-lamp-busy:        -gray-660;
+    -color-lamp-closed:      -gray-550;
+    -color-lamp-failed:      #d9534f;
+    -color-text-failed:      #f0857f;
+
+    /* ---- Modena hooks, so built-in controls inherit the ramp ---- */
+    -fx-base:                     -color-surface;
+    -fx-background:               -color-bg;
+    -fx-control-inner-background: -color-surface;
+    -fx-accent:                   -color-surface-selected;
+    -fx-default-button:           -color-primary-fill;
+    -fx-focus-color:              -color-focus-ring;
+    -fx-faint-focus-color:        transparent;
+    -fx-text-base-color:          -color-text;
+    -fx-text-background-color:    -color-text;
+    -fx-text-inner-color:         -color-text;
+    -fx-mark-color:               -color-text-muted;
+    -fx-selection-bar:            -color-surface-selected;
+    -fx-selection-bar-non-focused:-color-surface-selected;
+    -fx-selection-bar-text:       -color-text;
+    -fx-box-border:               -color-border;
+    -fx-text-box-border:          -color-border;
+    -fx-outer-border:             -color-border;
+    -fx-inner-border:             transparent;
+    -fx-body-color:               -color-surface;
+    -fx-shadow-highlight-color:   transparent;
+
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 13px;
+
+    /*
+     * The background is a stage, not a flat fill: a vertical falloff from a
+     * lighter top to near-black at the bottom, with a soft glow behind the
+     * compose area. Panels sit on it with a shadow so they read as lifted.
+     */
+    -fx-background-color:
+        linear-gradient(to bottom, -gray-240 0%, -color-bg 55%, #060606 100%),
+        radial-gradient(center 55% 12%, radius 60%, -color-bg-glow 0%, rgba(46, 46, 46, 0.0) 100%);
+}
+
+/* =====================================================================
+   Typography roles
+   ===================================================================== */
+
+/* Small caps-style zone labels: SERVER / TEXT / TRANSCRIPT / SPEECH */
+.eyebrow {
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-font-size: 11px;
+    -fx-text-fill: -color-text-muted;
+}
+
+/* Labels above a single control */
+.field-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-text-muted;
+}
+
+/* =====================================================================
+   Server rail and the tally lamp (signature element)
+   ===================================================================== */
+
+.server-rail {
+    -fx-min-width: 168px;
+    -fx-pref-width: 168px;
+}
+
+.server-status {
+    -fx-padding: 8 12 8 12;
+    -fx-background-color: -color-surface;
+    -fx-background-radius: 6;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, -color-shadow, 14, 0.15, 0, 4);
+}
+
+.server-status .status-text {
+    -fx-font-family: "Consolas";
+    -fx-font-size: 13px;
+    -fx-text-fill: -color-text-muted;
+}
+
+/* Closed: a hollow ring. Nothing is lit. */
+.tally-lamp {
+    -fx-fill: transparent;
+    -fx-stroke: -color-lamp-closed;
+    -fx-stroke-width: 1.5;
+}
+
+/* Starting / closing: a dim filled lamp. */
+.server-status.state-starting .tally-lamp,
+.server-status.state-closing  .tally-lamp {
+    -fx-fill: -color-lamp-busy;
+    -fx-stroke: transparent;
+}
+
+.server-status.state-starting .status-text,
+.server-status.state-closing  .status-text {
+    -fx-text-fill: -color-text;
+}
+
+/* Failed: a red lamp with a faint halo, and the text takes the same hue. */
+.server-status.state-failed .tally-lamp {
+    -fx-fill: -color-lamp-failed;
+    -fx-stroke: transparent;
+    -fx-effect: dropshadow(gaussian, -color-lamp-failed, 8, 0.3, 0, 0);
+}
+
+.server-status.state-failed .status-text {
+    -fx-text-fill: -color-text-failed;
+}
+
+/* Running: full brightness with a soft halo, like an on-air lamp. */
+.server-status.state-running .tally-lamp {
+    -fx-fill: -color-lamp-running;
+    -fx-stroke: transparent;
+    -fx-effect: dropshadow(gaussian, -color-lamp-running, 10, 0.35, 0, 0);
+}
+
+.server-status.state-running .status-text {
+    -fx-text-fill: -color-text-running;
+}
+
+/* =====================================================================
+   Buttons
+   ===================================================================== */
+
+.button {
+    -fx-background-color: -color-surface;
+    -fx-background-insets: 0;
+    -fx-background-radius: 6;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-text-fill: -color-text;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-font-size: 13px;
+    -fx-padding: 8 14 8 14;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: -color-surface-hover;
+    -fx-border-color: -color-border-strong;
+}
+
+.button:pressed,
+.button:armed {
+    -fx-background-color: -color-surface-selected;
+}
+
+/* Keyboard focus: a 2px ring outside the control */
+.button:focus-visible {
+    -fx-background-color: -color-focus-ring, -color-surface;
+    -fx-background-insets: -3, 0;
+    -fx-background-radius: 9, 6;
+}
+
+.button:disabled {
+    -fx-opacity: 0.45;
+    -fx-cursor: default;
+}
+
+/* The one filled action per view */
+.button.primary {
+    -fx-background-color: -color-primary-fill;
+    -fx-border-color: transparent;
+    -fx-text-fill: -color-primary-label;
+}
+
+.button.primary:hover {
+    -fx-background-color: -color-primary-hover;
+}
+
+.button.primary:pressed,
+.button.primary:armed {
+    -fx-background-color: -color-primary-pressed;
+}
+
+.button.primary:focus-visible {
+    -fx-background-color: -color-focus-ring, -color-bg, -color-primary-fill;
+    -fx-background-insets: -3, -1, 0;
+    -fx-background-radius: 9, 7, 6;
+}
+
+/* Quiet text-only button for secondary actions such as clearing the transcript */
+.button.ghost {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -color-text-muted;
+    -fx-font-size: 11px;
+    -fx-padding: 2 8 2 8;
+}
+
+.button.ghost:hover {
+    -fx-background-color: -color-surface-hover;
+    -fx-text-fill: -color-text;
+}
+
+.button.ghost:pressed,
+.button.ghost:armed {
+    -fx-background-color: -color-surface-selected;
+}
+
+.button.ghost:focus-visible {
+    -fx-background-color: -color-focus-ring, transparent;
+}
+
+/* =====================================================================
+   Text input (compose area)
+   ===================================================================== */
+
+.text-area {
+    -fx-background-color: -color-surface;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-text-fill: -color-text;
+    -fx-prompt-text-fill: -color-text-placeholder;
+    -fx-highlight-fill: -color-text-selection;
+    -fx-highlight-text-fill: -color-text;
+    -fx-font-size: 14px;
+    -fx-effect: dropshadow(gaussian, -color-shadow, 18, 0.15, 0, 6);
+}
+
+.text-area:focused {
+    -fx-background-color: -color-focus-ring, -color-surface;
+    -fx-background-insets: -3, 0;
+    -fx-background-radius: 11, 8;
+}
+
+.text-area .content {
+    -fx-background-color: transparent;
+    -fx-padding: 10 12 10 12;
+}
+
+.text-area .scroll-pane,
+.text-area .scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+/* =====================================================================
+   Transcript (received text, read aloud)
+   ===================================================================== */
+
+.transcript {
+    -fx-background-color: -color-surface;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-padding: 0;
+    -fx-effect: dropshadow(gaussian, -color-shadow, 18, 0.15, 0, 6);
+}
+
+.transcript:focused {
+    -fx-background-color: -color-focus-ring, -color-surface;
+    -fx-background-insets: -3, 0;
+    -fx-background-radius: 11, 8;
+}
+
+.transcript > .viewport {
+    -fx-background-color: transparent;
+}
+
+.transcript-placeholder {
+    -fx-padding: 12 14 12 14;
+    -fx-font-size: 14px;
+    -fx-text-fill: -color-text-placeholder;
+}
+
+.transcript-flow {
+    -fx-padding: 12 14 12 14;
+    -fx-line-spacing: 5px;
+}
+
+/* Text nodes added to the flow at runtime */
+.transcript-flow .text,
+.transcript-flow Text {
+    -fx-fill: -color-text;
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 16px;
+}
+
+/* =====================================================================
+   ComboBox
+   ===================================================================== */
+
+.combo-box {
+    -fx-background-color: -color-surface;
+    -fx-background-insets: 0;
+    -fx-background-radius: 6;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-padding: 1 4 1 4;
+}
+
+.combo-box:hover {
+    -fx-border-color: -color-border-strong;
+}
+
+.combo-box:focus-visible {
+    -fx-background-color: -color-focus-ring, -color-surface;
+    -fx-background-insets: -3, 0;
+    -fx-background-radius: 9, 6;
+}
+
+.combo-box > .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-text;
+    -fx-padding: 6 6 6 6;
+}
+
+.combo-box > .list-cell:empty,
+.combo-box:showing > .list-cell:empty {
+    -fx-text-fill: -color-text-placeholder;
+}
+
+.combo-box > .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 6 0 6;
+}
+
+.combo-box > .arrow-button > .arrow {
+    -fx-background-color: -color-text-muted;
+}
+
+.combo-box-popup > .list-view {
+    -fx-background-color: -color-surface;
+    -fx-background-insets: 0;
+    -fx-background-radius: 6;
+    -fx-border-color: -color-border-strong;
+    -fx-border-radius: 6;
+    -fx-padding: 4;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 16, 0.2, 0, 6);
+}
+
+.combo-box-popup > .list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-background-radius: 4;
+    -fx-text-fill: -color-text;
+    -fx-padding: 6 8 6 8;
+}
+
+.combo-box-popup > .list-view .list-cell:filled:hover {
+    -fx-background-color: -color-surface-hover;
+}
+
+.combo-box-popup > .list-view .list-cell:filled:selected,
+.combo-box-popup > .list-view .list-cell:filled:selected:hover {
+    -fx-background-color: -color-surface-selected;
+    -fx-text-fill: -color-text;
+}
+
+/* =====================================================================
+   Spinner (speed)
+   ===================================================================== */
+
+.spinner {
+    -fx-min-height: 34px;
+    -fx-background-color: -color-surface;
+    -fx-background-insets: 0;
+    -fx-background-radius: 6;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+}
+
+.spinner:focused,
+.spinner:contains-focus {
+    -fx-background-color: -color-focus-ring, -color-surface;
+    -fx-background-insets: -3, 0;
+    -fx-background-radius: 9, 6;
+}
+
+.spinner > .text-field {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 6 0 0 6;
+    -fx-border-color: transparent;
+    -fx-text-fill: -color-text;
+    -fx-font-family: "Consolas";
+    -fx-font-size: 13px;
+    -fx-padding: 6 8 6 8;
+    -fx-highlight-fill: -color-text-selection;
+    -fx-highlight-text-fill: -color-text;
+}
+
+.spinner > .increment-arrow-button,
+.spinner > .decrement-arrow-button {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: -color-border;
+    -fx-border-width: 0 0 0 1;
+    -fx-padding: 5 8 5 8;
+}
+
+.spinner > .increment-arrow-button:hover,
+.spinner > .decrement-arrow-button:hover {
+    -fx-background-color: -color-surface-hover;
+}
+
+.spinner > .increment-arrow-button > .increment-arrow,
+.spinner > .decrement-arrow-button > .decrement-arrow {
+    -fx-background-color: -color-text-muted;
+}
+
+/* =====================================================================
+   Scrollbars: thin, trackless, no arrow buttons
+   ===================================================================== */
+
+.scroll-bar {
+    -fx-background-color: transparent;
+    -fx-padding: 1;
+}
+
+.scroll-bar > .track,
+.scroll-bar > .track-background {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar > .thumb {
+    -fx-background-color: -color-border;
+    -fx-background-insets: 0;
+    -fx-background-radius: 4;
+}
+
+.scroll-bar > .thumb:hover,
+.scroll-bar > .thumb:pressed {
+    -fx-background-color: -color-border-strong;
+}
+
+.scroll-bar > .increment-button,
+.scroll-bar > .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-bar > .increment-button > .increment-arrow,
+.scroll-bar > .decrement-button > .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+}
+
+.scroll-bar:vertical {
+    -fx-pref-width: 12;
+}
+
+.scroll-bar:horizontal {
+    -fx-pref-height: 12;
+}
+
+.scroll-pane > .corner {
+    -fx-background-color: transparent;
+}

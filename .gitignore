@@ -1,0 +1,6 @@
+# Java / Maven
+ttsit-client/target/
+
+# OS
+Thumbs.db
+.DS_Store

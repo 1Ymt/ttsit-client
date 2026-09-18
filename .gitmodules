@@ -1,0 +1,3 @@
+[submodule "ttsit"]
+	path = ttsit
+	url = https://github.com/1Ymt/ttsit.git
