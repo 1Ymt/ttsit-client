@@ -13,7 +13,7 @@ local `ttsit` process; its state is shown by the status lamp.
 
 | | |
 |---|---|
-| ![Server closed](docs/ui/state-closed.png) | ![Voice picker](docs/ui/voices-popup.png) |
+| ![Server closed](ttsit-client/docs/ui/state-closed.png) | ![Voice picker](ttsit-client/docs/ui/voices-popup.png) |
 
 ## Setup
 
@@ -32,6 +32,8 @@ Then set up the `ttsit` submodule's Python environment as described in
 
 ## Running
 
+From the `ttsit-client` directory:
+
 ```
 mvnw.cmd javafx:run      # Windows
 ./mvnw javafx:run        # Linux/macOS
@@ -39,4 +41,4 @@ mvnw.cmd javafx:run      # Windows
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT - see [LICENSE](LICENSE).
