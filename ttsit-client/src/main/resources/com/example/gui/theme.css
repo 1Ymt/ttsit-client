@@ -1,35 +1,20 @@
-/*
- * TTS client theme: minimal black / gray.
- *
- * One neutral ramp carries the whole interface. Emphasis comes from lightness,
- * not hue: the single filled action is near-white on near-black, and server
- * status is read from the tally lamp (hollow = closed, mid-gray =
- * starting/closing, green + glow = running, red = failed) plus its text.
- *
- * Tiers:
- *   primitives  -gray-*        values only, never used by a component
- *   semantic    -color-*       roles, the only tier components reference
- */
-
 .root {
-    /* ---- primitives (OKLCH lightness, chroma 0) ---- */
-    -gray-180: #121212;   /* L 0.18 */
-    -gray-240: #1f1f1f;   /* L 0.24 */
-    -gray-300: #2e2e2e;   /* L 0.30 */
-    -gray-360: #3d3d3d;   /* L 0.36 */
-    -gray-480: #5e5e5e;   /* L 0.48 */
-    -gray-550: #717171;   /* L 0.55 */
-    -gray-620: #868686;   /* L 0.62 */
-    -gray-660: #929292;   /* L 0.66 */
-    -gray-780: #b7b7b7;   /* L 0.78 */
-    -gray-840: #cacaca;   /* L 0.84 */
-    -gray-920: #e4e4e4;   /* L 0.92 */
-    -gray-950: #eeeeee;   /* L 0.95 */
-    -gray-960: #f2f2f2;   /* L 0.96 */
-    -gray-980: #f8f8f8;   /* L 0.98 */
-    -gray-150: #0b0b0b;   /* L 0.15 */
+    -gray-180: #121212;
+    -gray-240: #1f1f1f;
+    -gray-300: #2e2e2e;
+    -gray-360: #3d3d3d;
+    -gray-480: #5e5e5e;
+    -gray-550: #717171;
+    -gray-620: #868686;
+    -gray-660: #929292;
+    -gray-780: #b7b7b7;
+    -gray-840: #cacaca;
+    -gray-920: #e4e4e4;
+    -gray-950: #eeeeee;
+    -gray-960: #f2f2f2;
+    -gray-980: #f8f8f8;
+    -gray-150: #0b0b0b;
 
-    /* ---- semantic: surfaces ---- */
     -color-bg:               -gray-150;
     -color-bg-glow:          -gray-300;
     -color-surface:          -gray-240;
@@ -37,25 +22,20 @@
     -color-surface-hover:    -gray-300;
     -color-surface-selected: -gray-360;
 
-    /* ---- semantic: lines ---- */
     -color-border:           -gray-480;
     -color-border-strong:    -gray-550;
     -color-focus-ring:       -gray-950;
 
-    /* ---- semantic: text ---- */
     -color-text:             -gray-950;
     -color-text-muted:       -gray-780;
     -color-text-placeholder: -gray-620;
     -color-text-selection:   -gray-360;
 
-    /* ---- semantic: the one filled action ---- */
     -color-primary-fill:     -gray-920;
     -color-primary-hover:    -gray-980;
     -color-primary-pressed:  -gray-840;
     -color-primary-label:    -gray-150;
 
-    /* ---- semantic: tally lamp ---- */
-    /* Running and failed are the two states that earn a hue: a green and a red that sit in the dark ramp. */
     -color-lamp-running:     #3fb950;
     -color-text-running:     #7ee787;
     -color-lamp-busy:        -gray-660;
@@ -63,7 +43,6 @@
     -color-lamp-failed:      #d9534f;
     -color-text-failed:      #f0857f;
 
-    /* ---- Modena hooks, so built-in controls inherit the ramp ---- */
     -fx-base:                     -color-surface;
     -fx-background:               -color-bg;
     -fx-control-inner-background: -color-surface;
@@ -88,36 +67,21 @@
     -fx-font-family: "Segoe UI";
     -fx-font-size: 13px;
 
-    /*
-     * The background is a stage, not a flat fill: a vertical falloff from a
-     * lighter top to near-black at the bottom, with a soft glow behind the
-     * compose area. Panels sit on it with a shadow so they read as lifted.
-     */
     -fx-background-color:
         linear-gradient(to bottom, -gray-240 0%, -color-bg 55%, #060606 100%),
         radial-gradient(center 55% 12%, radius 60%, -color-bg-glow 0%, rgba(46, 46, 46, 0.0) 100%);
 }
 
-/* =====================================================================
-   Typography roles
-   ===================================================================== */
-
-/* Small caps-style zone labels: SERVER / TEXT / TRANSCRIPT / SPEECH */
 .eyebrow {
     -fx-font-family: "Segoe UI Semibold";
     -fx-font-size: 11px;
     -fx-text-fill: -color-text-muted;
 }
 
-/* Labels above a single control */
 .field-label {
     -fx-font-size: 12px;
     -fx-text-fill: -color-text-muted;
 }
-
-/* =====================================================================
-   Server rail and the tally lamp (signature element)
-   ===================================================================== */
 
 .server-rail {
     -fx-min-width: 168px;
@@ -140,14 +104,12 @@
     -fx-text-fill: -color-text-muted;
 }
 
-/* Closed: a hollow ring. Nothing is lit. */
 .tally-lamp {
     -fx-fill: transparent;
     -fx-stroke: -color-lamp-closed;
     -fx-stroke-width: 1.5;
 }
 
-/* Starting / closing: a dim filled lamp. */
 .server-status.state-starting .tally-lamp,
 .server-status.state-closing  .tally-lamp {
     -fx-fill: -color-lamp-busy;
@@ -159,7 +121,6 @@
     -fx-text-fill: -color-text;
 }
 
-/* Failed: a red lamp with a faint halo, and the text takes the same hue. */
 .server-status.state-failed .tally-lamp {
     -fx-fill: -color-lamp-failed;
     -fx-stroke: transparent;
@@ -170,7 +131,6 @@
     -fx-text-fill: -color-text-failed;
 }
 
-/* Running: full brightness with a soft halo, like an on-air lamp. */
 .server-status.state-running .tally-lamp {
     -fx-fill: -color-lamp-running;
     -fx-stroke: transparent;
@@ -180,10 +140,6 @@
 .server-status.state-running .status-text {
     -fx-text-fill: -color-text-running;
 }
-
-/* =====================================================================
-   Buttons
-   ===================================================================== */
 
 .button {
     -fx-background-color: -color-surface;
@@ -209,7 +165,6 @@
     -fx-background-color: -color-surface-selected;
 }
 
-/* Keyboard focus: a 2px ring outside the control */
 .button:focus-visible {
     -fx-background-color: -color-focus-ring, -color-surface;
     -fx-background-insets: -3, 0;
@@ -221,7 +176,6 @@
     -fx-cursor: default;
 }
 
-/* The one filled action per view */
 .button.primary {
     -fx-background-color: -color-primary-fill;
     -fx-border-color: transparent;
@@ -243,7 +197,6 @@
     -fx-background-radius: 9, 7, 6;
 }
 
-/* Quiet text-only button for secondary actions such as clearing the transcript */
 .button.ghost {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
@@ -265,10 +218,6 @@
 .button.ghost:focus-visible {
     -fx-background-color: -color-focus-ring, transparent;
 }
-
-/* =====================================================================
-   Text input (compose area)
-   ===================================================================== */
 
 .text-area {
     -fx-background-color: -color-surface;
@@ -300,10 +249,6 @@
 .text-area .scroll-pane .viewport {
     -fx-background-color: transparent;
 }
-
-/* =====================================================================
-   Transcript (received text, read aloud)
-   ===================================================================== */
 
 .transcript {
     -fx-background-color: -color-surface;
@@ -337,17 +282,12 @@
     -fx-line-spacing: 5px;
 }
 
-/* Text nodes added to the flow at runtime */
 .transcript-flow .text,
 .transcript-flow Text {
     -fx-fill: -color-text;
     -fx-font-family: "Segoe UI";
     -fx-font-size: 16px;
 }
-
-/* =====================================================================
-   ComboBox
-   ===================================================================== */
 
 .combo-box {
     -fx-background-color: -color-surface;
@@ -416,10 +356,6 @@
     -fx-text-fill: -color-text;
 }
 
-/* =====================================================================
-   Spinner (speed)
-   ===================================================================== */
-
 .spinner {
     -fx-min-height: 34px;
     -fx-background-color: -color-surface;
@@ -468,10 +404,6 @@
 .spinner > .decrement-arrow-button > .decrement-arrow {
     -fx-background-color: -color-text-muted;
 }
-
-/* =====================================================================
-   Scrollbars: thin, trackless, no arrow buttons
-   ===================================================================== */
 
 .scroll-bar {
     -fx-background-color: transparent;

@@ -19,12 +19,6 @@
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.TextFlow?>
 
-<!--
-    Three zones, left to right: the server you talk to, the text you send and
-    get back, and the voice that reads it. The grid keeps "Send" level with the
-    compose box and the speech controls level with the transcript, so each
-    control sits beside the thing it acts on.
--->
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.gui.MainController"
             prefWidth="1000" prefHeight="600">
@@ -32,7 +26,6 @@
         <Insets top="24" right="24" bottom="24" left="24"/>
     </padding>
 
-    <!-- Left: server controls and the tally lamp -->
     <left>
         <VBox fx:id="serverRail" spacing="12" styleClass="server-rail">
             <BorderPane.margin>
@@ -51,7 +44,6 @@
         </VBox>
     </left>
 
-    <!-- Center: compose + transcript, with their controls beside them -->
     <center>
         <GridPane hgap="20" vgap="8">
             <columnConstraints>
@@ -65,16 +57,13 @@
                 <RowConstraints vgrow="ALWAYS"/>
             </rowConstraints>
 
-            <!-- Row 0: eyebrow for the compose box -->
             <Label fx:id="textEyebrow" text="TEXT" styleClass="eyebrow" accessibleText="Text to speak" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
 
-            <!-- Row 1: compose box and Send -->
             <TextArea fx:id="inputTextArea" promptText="Type what should be spoken…" wrapText="true"
                       GridPane.rowIndex="1" GridPane.columnIndex="0"/>
             <Button fx:id="sendButton" text="Send" maxWidth="Infinity" onAction="#onSend"
                     GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.valignment="TOP"/>
 
-            <!-- Row 2: eyebrows for transcript and speech -->
             <HBox fx:id="transcriptHeader" alignment="CENTER_LEFT" GridPane.rowIndex="2" GridPane.columnIndex="0">
                 <GridPane.margin><Insets top="12"/></GridPane.margin>
                 <Label fx:id="transcriptEyebrow" text="TRANSCRIPT" styleClass="eyebrow" accessibleText="Transcript"/>
@@ -86,7 +75,6 @@
                 <GridPane.margin><Insets top="12"/></GridPane.margin>
             </Label>
 
-            <!-- Row 3: transcript and the speech controls -->
             <ScrollPane fx:id="transcriptScrollPane" fitToWidth="true" styleClass="transcript"
                         GridPane.rowIndex="3" GridPane.columnIndex="0">
                 <StackPane alignment="TOP_LEFT">
