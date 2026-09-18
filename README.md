@@ -7,13 +7,20 @@ audio while the next is still being synthesized.
 
 ## Usage
 
-Paste or type text into the transcript box, pick a voice, language and speed,
-then hit **Read Aloud**. Use **Start Server** / **Stop Server** to control the
-local `ttsit` process; its state is shown by the status lamp.
+Click **Start Server** and wait for the status lamp to turn green (this launches
+the local `ttsit` process for you). Type or paste text into the **Text** box and
+hit **Send** to move it into the transcript. Pick a **voice**, **language** and
+**speed** on the right, then click **Read Aloud**: the transcript is split into
+sentences and streamed back as audio one sentence at a time, so playback starts
+before the whole text has finished synthesizing. Trying to read aloud before
+the server is running, or with an empty transcript, shows a hint explaining
+what to do instead of silently doing nothing. Use **Stop Server** when you're
+done.
 
 | | |
 |---|---|
 | ![Server closed](ttsit-client/docs/ui/state-closed.png) | ![Voice picker](ttsit-client/docs/ui/voices-popup.png) |
+| ![Read Aloud hint](ttsit-client/docs/ui/hint.png) | |
 
 ## Setup
 
