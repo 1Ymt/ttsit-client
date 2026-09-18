@@ -71,10 +71,6 @@
                 <Button fx:id="clearTranscriptButton" text="Clear" styleClass="ghost" onAction="#onClearTranscript"
                         accessibleText="Clear transcript"/>
             </HBox>
-            <Label fx:id="speechEyebrow" text="SPEECH" styleClass="eyebrow" accessibleText="Speech" GridPane.rowIndex="2" GridPane.columnIndex="1">
-                <GridPane.margin><Insets top="12"/></GridPane.margin>
-            </Label>
-
             <ScrollPane fx:id="transcriptScrollPane" fitToWidth="true" styleClass="transcript"
                         GridPane.rowIndex="3" GridPane.columnIndex="0">
                 <StackPane alignment="TOP_LEFT">
@@ -85,25 +81,40 @@
             </ScrollPane>
 
             <VBox fx:id="speechControls" spacing="12" GridPane.rowIndex="3" GridPane.columnIndex="1" GridPane.valignment="TOP">
+                <Label fx:id="readAloudHint" styleClass="hint" wrapText="true" maxWidth="Infinity" opacity="0"/>
                 <Button fx:id="readAloudButton" text="Read aloud" maxWidth="Infinity" styleClass="primary" onAction="#onReadAloud"/>
 
-                <VBox spacing="4">
-                    <Label text="Voice" styleClass="field-label" labelFor="$voiceComboBox"/>
-                    <ComboBox fx:id="voiceComboBox" promptText="Choose a voice…" maxWidth="Infinity"/>
-                </VBox>
+                <VBox>
+                    <VBox.margin><Insets top="8"/></VBox.margin>
 
-                <VBox spacing="4">
-                    <Label text="Language" styleClass="field-label" labelFor="$languageComboBox"/>
-                    <ComboBox fx:id="languageComboBox" promptText="Choose a language…" maxWidth="Infinity"/>
-                </VBox>
+                    <HBox alignment="TOP_CENTER">
+                        <Region styleClass="fieldset-rule, left" HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="speechEyebrow" text="TTS SETTINGS" styleClass="eyebrow" accessibleText="TTS settings">
+                            <HBox.margin><Insets left="8" right="8"/></HBox.margin>
+                        </Label>
+                        <Region styleClass="fieldset-rule, right" HBox.hgrow="ALWAYS"/>
+                    </HBox>
 
-                <VBox spacing="4">
-                    <Label text="Speed" styleClass="field-label" labelFor="$speedSpinner"/>
-                    <Spinner fx:id="speedSpinner" editable="true" prefWidth="96">
-                        <valueFactory>
-                            <SpinnerValueFactory.DoubleSpinnerValueFactory min="0.5" max="2.0" initialValue="1.0" amountToStepBy="0.1"/>
-                        </valueFactory>
-                    </Spinner>
+                    <VBox spacing="12" styleClass="fieldset-body">
+                        <VBox spacing="4">
+                            <Label text="Voice" styleClass="field-label" labelFor="$voiceComboBox"/>
+                            <ComboBox fx:id="voiceComboBox" promptText="Choose a voice…" maxWidth="Infinity"/>
+                        </VBox>
+
+                        <VBox spacing="4">
+                            <Label text="Language" styleClass="field-label" labelFor="$languageComboBox"/>
+                            <ComboBox fx:id="languageComboBox" promptText="Choose a language…" maxWidth="Infinity"/>
+                        </VBox>
+
+                        <VBox spacing="4">
+                            <Label text="Speed" styleClass="field-label" labelFor="$speedSpinner"/>
+                            <Spinner fx:id="speedSpinner" editable="true" prefWidth="96">
+                                <valueFactory>
+                                    <SpinnerValueFactory.DoubleSpinnerValueFactory min="0.5" max="2.0" initialValue="1.0" amountToStepBy="0.1"/>
+                                </valueFactory>
+                            </Spinner>
+                        </VBox>
+                    </VBox>
                 </VBox>
             </VBox>
         </GridPane>

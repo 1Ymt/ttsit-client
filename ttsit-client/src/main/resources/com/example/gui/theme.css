@@ -83,6 +83,33 @@
     -fx-text-fill: -color-text-muted;
 }
 
+.fieldset-rule {
+    -fx-border-color: -color-border;
+}
+
+.fieldset-rule.left {
+    -fx-border-width: 1 0 0 1;
+    -fx-border-radius: 6 0 0 0;
+}
+
+.fieldset-rule.right {
+    -fx-border-width: 1 1 0 0;
+    -fx-border-radius: 0 6 0 0;
+}
+
+.fieldset-body {
+    -fx-border-color: -color-border;
+    -fx-border-width: 0 1 1 1;
+    -fx-border-radius: 0 0 6 6;
+    -fx-padding: 8 12 12 12;
+}
+
+.hint {
+    -fx-min-height: 32px;
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-text-failed;
+}
+
 .server-rail {
     -fx-min-width: 168px;
     -fx-pref-width: 168px;

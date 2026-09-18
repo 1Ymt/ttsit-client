@@ -9,6 +9,7 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.ParallelTransition;
+import javafx.animation.PauseTransition;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
@@ -52,6 +53,8 @@ public final class Animations {
     private static final Duration SLOW = millis(320);
     private static final Duration STAGGER = millis(70);
     private static final Duration BREATH = millis(900);
+    /** How long a hint stays readable; not shortened by reduced motion, since it is not motion. */
+    private static final Duration HINT_LINGER = Duration.millis(4000);
 
     private static final double HOVER_SCALE = 1.02;
     private static final double PRESSED_SCALE = 0.97;
@@ -59,6 +62,8 @@ public final class Animations {
 
     private static final String SCALE_KEY = "animations.scale";
     private static final String BUSY_KEY = "animations.busy";
+    private static final String HINT_KEY = "animations.hint";
+    private static final String HINT_FADE_KEY = "animations.hintFade";
 
     private Animations() {
     }
@@ -194,6 +199,52 @@ public final class Animations {
                 new KeyFrame(Duration.millis(320), new KeyValue(node.translateXProperty(), 3, MOVE)),
                 new KeyFrame(Duration.millis(400), new KeyValue(node.translateXProperty(), 0, MOVE)));
         shake.play();
+    }
+
+    // ------------------------------------------------------------------ hint
+
+    /**
+     * Shows a hint under a shaken group: the text is set, the label fades in
+     * (ease-out) and fades out again by itself after {@link #HINT_LINGER}.
+     * Calling it again while showing swaps the text and restarts the timer.
+     */
+    public static void showHint(Label hint, String text) {
+        stopHint(hint);
+        hint.setText(text);
+        fadeHint(hint, 1, NORMAL, ENTER);
+
+        PauseTransition linger = new PauseTransition(HINT_LINGER);
+        linger.setOnFinished(e -> hideHint(hint));
+        hint.getProperties().put(HINT_KEY, linger);
+        linger.play();
+    }
+
+    /** Fades the hint out (ease-in) and cancels its timer. No-op when already hidden. */
+    public static void hideHint(Label hint) {
+        stopHint(hint);
+        if (hint.getOpacity() == 0) {
+            return;
+        }
+        fadeHint(hint, 0, FAST, EXIT);
+    }
+
+    private static void fadeHint(Label hint, double to, Duration duration, Interpolator curve) {
+        FadeTransition previous = (FadeTransition) hint.getProperties().get(HINT_FADE_KEY);
+        if (previous != null) {
+            previous.stop();
+        }
+        FadeTransition fade = new FadeTransition(duration, hint);
+        fade.setToValue(to);
+        fade.setInterpolator(curve);
+        hint.getProperties().put(HINT_FADE_KEY, fade);
+        fade.play();
+    }
+
+    private static void stopHint(Label hint) {
+        PauseTransition linger = (PauseTransition) hint.getProperties().remove(HINT_KEY);
+        if (linger != null) {
+            linger.stop();
+        }
     }
 
     private static void pop(Node node) {

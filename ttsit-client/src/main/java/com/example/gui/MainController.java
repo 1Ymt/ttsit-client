@@ -83,6 +83,9 @@ public class MainController {
     private VBox speechControls;
 
     @FXML
+    private Label readAloudHint;
+
+    @FXML
     private Button readAloudButton;
 
     @FXML
@@ -93,6 +96,9 @@ public class MainController {
 
     @FXML
     private ComboBox<Language> languageComboBox;
+
+    private static final String HINT_SERVER_OFFLINE = "Start the server first.";
+    private static final String HINT_TRANSCRIPT_EMPTY = "Nothing to read. Send text first.";
 
     private Server server;
     private AudioPlayer audioPlayer;
@@ -109,24 +115,23 @@ public class MainController {
     private void init() {
         voiceComboBox.getItems().setAll(Voice.values());
         languageComboBox.getItems().setAll(Language.values());
-        // The first entry of each dropdown is preselected so a request can be sent right away.
+
         voiceComboBox.getSelectionModel().selectFirst();
         languageComboBox.getSelectionModel().selectFirst();
         speedSpinner.getValueFactory().setConverter(speedFormat);
-        // A value typed into the spinner is committed when focus leaves it, not only on Enter.
+        
         speedSpinner.focusedProperty().addListener((obs, was, isFocused) -> {
             if (!isFocused) {
                 speedSpinner.commitValue();
             }
         });
 
-        // Zone labels name the control they sit above, so assistive tech reads them together.
         textEyebrow.setLabelFor(inputTextArea);
         transcriptEyebrow.setLabelFor(transcriptScrollPane);
+        speechEyebrow.translateYProperty().bind(speechEyebrow.heightProperty().divide(-2));
 
-        // Empty state: the placeholder is shown until the first reply arrives.
         transcriptPlaceholder.visibleProperty().bind(Bindings.isEmpty(receivedTextFlow.getChildren()));
-        // Nothing to clear while the transcript is empty.
+
         clearTranscriptButton.disableProperty().bind(Bindings.isEmpty(receivedTextFlow.getChildren()));
 
         setServerState(ServerState.CLOSED);
@@ -136,7 +141,7 @@ public class MainController {
         Animations.playEntrance(
                 new Node[] {serverRail},
                 new Node[] {textEyebrow, inputTextArea, sendButton},
-                new Node[] {transcriptHeader, transcriptScrollPane, speechEyebrow, speechControls });
+                new Node[] {transcriptHeader, transcriptScrollPane, speechControls });
     }
 
     /** Shows the speed as e.g. "1.0" so the readout has a stable width. */
@@ -151,7 +156,7 @@ public class MainController {
             try {
                 return Double.parseDouble(text.trim().replace(',', '.'));
             } catch (NumberFormatException e) {
-                return speedSpinner.getValue();  // keep the last valid value instead of resetting
+                return speedSpinner.getValue();
             }
         }
     };
@@ -174,15 +179,24 @@ public class MainController {
             Animations.shake(serverStatusBox);
         }
 
-        // Only the action that makes sense in this state is available; both are off while busy.
-        // After a failure the server can be started again.
         startServerButton.setDisable(state != ServerState.CLOSED && state != ServerState.FAILED);
         stopServerButton.setDisable(state != ServerState.RUNNING);
+
+        if (state == ServerState.RUNNING && HINT_SERVER_OFFLINE.equals(readAloudHint.getText())) {
+            Animations.hideHint(readAloudHint);
+        }
     }
 
-    /** Appends a received line to the transcript; it rises into view and the transcript scrolls to it. */
     public void appendReceived(String text) {
         Animations.appendReceived(transcriptScrollPane, receivedTextFlow, text);
+        if (!text.isBlank() && HINT_TRANSCRIPT_EMPTY.equals(readAloudHint.getText())) {
+            Animations.hideHint(readAloudHint);
+        }
+    }
+
+    private void refuseReadAloud(String reason) {
+        Animations.shake(speechControls);
+        Animations.showHint(readAloudHint, reason);
     }
 
     @FXML
@@ -253,11 +267,16 @@ public class MainController {
     @FXML
     private void onReadAloud() throws IOException, InterruptedException, LineUnavailableException {
         if (!server.isRunning()) {
-            Animations.shake(speechControls);
+            refuseReadAloud(HINT_SERVER_OFFLINE);
             return;
         }
-            
+
         String text = getTextFromFlowtext();
+        if (text.isBlank()) {
+            refuseReadAloud(HINT_TRANSCRIPT_EMPTY);
+            return;
+        }
+        Animations.hideHint(readAloudHint);
         List<Sentence> sentences = splitSentence(text);
 
         readAloudService.setup(sentences, voiceComboBox.getValue(), speedSpinner.getValue().floatValue(), languageComboBox.getValue());
