@@ -9,6 +9,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
+import com.example.record.SynthesizeRequest;
+import com.example.record.SynthesizeResponse;
+import com.google.gson.Gson;
+
 //TODO: Add periodic health check to see if the server is still running
 
 public class Server {
@@ -16,12 +20,14 @@ public class Server {
     private int port;
     private String base;
 
+    private Gson gson;
     private ProcessBuilder processBuilder;
     private Process process;
     private HttpClient client;
     
     
     public Server() {
+        this.gson = new Gson();
         this.port = freePort();
         File pythonAppDir = findPythonAppDir();
         File pythonExecutable = findVenvPython(pythonAppDir);
@@ -63,14 +69,16 @@ public class Server {
             e.printStackTrace();
         }
     }
-    
-    public HttpResponse<String> sendSynthesizeRequest(String body)
-            throws IOException, InterruptedException {
-        var request = HttpRequest.newBuilder(URI.create(base + "/synthesize"))
+   
+    public SynthesizeResponse synthesize(SynthesizeRequest synthesizeRequest) throws IOException, InterruptedException {
+        String body = gson.toJson(synthesizeRequest);
+        HttpRequest request = HttpRequest.newBuilder(URI.create(base + "/synthesize"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(body))
                 .build();
-        return client.send(request, HttpResponse.BodyHandlers.ofString());
+        
+        HttpResponse<String> raw_response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        return gson.fromJson(raw_response.body(), SynthesizeResponse.class);
     }
     
     private void waitUntilHealthy(HttpClient client, String base, Process proc, Duration timeout)

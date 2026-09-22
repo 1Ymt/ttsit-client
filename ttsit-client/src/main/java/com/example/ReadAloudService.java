@@ -1,144 +1,72 @@
 package com.example;
 
-import java.net.http.HttpResponse;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
-import com.example.enums.Language;
-import com.example.enums.Voice;
-import com.example.record.Sentence;
-import com.example.record.SynthesizeRequest;
-import com.example.record.SynthesizeResponse;
-import com.google.gson.Gson;
+import com.example.gui.WordHighlighter;
+import com.example.record.SpokenSentence;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 
 public class ReadAloudService extends javafx.concurrent.Service<Void> {
-    
-    private static final SynthesizeResponse DONE = new SynthesizeResponse(-1, null);
 
-    private List<Sentence> sentences;
-    private Voice voice;
-    private float speed;
-    private Language language;
-
-    private Server server;
     private AudioPlayer audioPlayer;
-    private Gson gson;
+    private WordHighlighter highlighter;
+    private BlockingQueue<SpokenSentence> audioQueue;
 
-    public ReadAloudService(Server server, AudioPlayer audioPlayer) {
-        this(server, audioPlayer, null, null, 1.0f, Language.ENGLISH);
-    }
+    private long runId;
 
-    public ReadAloudService(Server server, AudioPlayer audioPlayer, List<Sentence> sentences, Voice voice, float speed,
-            Language language) {
-        this.server = server;
+    public ReadAloudService(AudioPlayer audioPlayer, WordHighlighter highlighter) {
         this.audioPlayer = audioPlayer;
-
-        this.sentences = sentences;
-        this.voice = voice;
-        this.speed = speed;
-        this.language = language;
-
-        this.gson = new Gson();
+        this.highlighter = highlighter;
+    }
+    
+    public void setup(BlockingQueue<SpokenSentence> queue) {
+        this.audioQueue = queue;
+        runId++;
     }
 
     @Override
     protected Task<Void> createTask() {
-        if (sentences == null || voice == null)
-            throw new IllegalStateException("sentences or voice are null");
+        if (audioQueue == null) {
+            throw new IllegalStateException("audioQueue is null.");
+        }
 
-        List<Sentence> snapshot = this.sentences;
-        String voice_id = this.voice.getId();
-        float speed = this.speed;
-        String language_tag = this.language.getTag();
-
-        BlockingQueue<SynthesizeResponse> audioQueue = new LinkedBlockingQueue<>(5);
+        final BlockingQueue<SpokenSentence> queue = audioQueue;
+        final long currentRunId = runId;
+        
         return new Task<Void>() {
             @Override
             protected Void call() throws Exception {
-                //Fetching raw audio string from tts server and putting it into queue
-                Thread fetchResponse = new Thread(() -> {
-                    try {
-                        for (Sentence sentence : snapshot) {
-                            if (isCancelled())
-                                break;
-                            SynthesizeRequest synthesizeRequest = new SynthesizeRequest(sentence.text(), voice_id,
-                                    speed, language_tag);
-                            String body = gson.toJson(synthesizeRequest);
-
-                            HttpResponse<String> raw_response = server.sendSynthesizeRequest(body);
-                            SynthesizeResponse response = gson.fromJson(raw_response.body(), SynthesizeResponse.class);
-
-                            audioQueue.put(response);
-                        }
-                    } catch (Exception e) {
-                        // TODO: handle exception
-                    } finally {
-                        audioQueue.offer(DONE);
-                    }
-                }, "fetch-audio");
-                fetchResponse.setDaemon(true);
-                fetchResponse.start();
-
                 //decoding raw audio string to byte and reading it
-                SynthesizeResponse response;
-                while ((response = audioQueue.take()) != DONE) {
+                SpokenSentence spoken;
+                audioPlayer.createLine();
+                audioPlayer.start();
+                while ((spoken = queue.take()) != SpokenSentence.DONE) {
                     if (isCancelled())
                         break;
-                    audioPlayer.read(response.pcm16_base64());
+                    final SpokenSentence current = spoken;
+                    final double lead = audioPlayer.bufferedSeconds();
+
+                    Platform.runLater(() -> highlighter.startHighlighting(current, lead));
+                    audioPlayer.read(current.pcm());
                 }
+                audioPlayer.finish();
+
                 return null;
             }
 
             @Override
             protected void cancelled() {
-                audioPlayer.stop();
-                audioQueue.clear();
+                if (currentRunId != runId)
+                    return;
+                highlighter.stop();
+
+                /* finish() may have closed the line already, which for cleanup is a success. */
+                if (audioPlayer.isOpen()) {
+                    audioPlayer.cancel();
+                }
             }
         };
     }
-
-   
-
-    public void setup(List<Sentence> sentences, Voice voice, Float speed, Language language) {
-        this.sentences = sentences;
-        this.voice = voice;
-        this.speed = speed;
-        this.language = language;
-    }
-    
-    public List<Sentence> getSentences() {
-        return sentences;
-    }
-
-    public void setSentences(List<Sentence> sentences) {
-        this.sentences = sentences;
-    }
-
-    public Voice getVoice() {
-        return voice;
-    }
-
-    public void setVoice(Voice voice) {
-        this.voice = voice;
-    }
-
-    public float getSpeed() {
-        return speed;
-    }
-
-    public void setSpeed(float speed) {
-        this.speed = speed;
-    }
-
-    public Language getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(Language language) {
-        this.language = language;
-    }
-
 }

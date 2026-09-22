@@ -17,6 +17,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.Path?>
 <?import javafx.scene.text.TextFlow?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
@@ -74,6 +75,8 @@
             <ScrollPane fx:id="transcriptScrollPane" fitToWidth="true" styleClass="transcript"
                         GridPane.rowIndex="3" GridPane.columnIndex="0">
                 <StackPane alignment="TOP_LEFT">
+                    <Path fx:id="transcriptHighlight" styleClass="transcript-highlight"
+                          managed="false" mouseTransparent="true"/>
                     <TextFlow fx:id="receivedTextFlow" styleClass="transcript-flow"/>
                     <Label fx:id="transcriptPlaceholder" text="Nothing received yet. Send text to see the reply here."
                            styleClass="transcript-placeholder" wrapText="true" mouseTransparent="true"/>

@@ -5,4 +5,4 @@ package com.example.record;
  *
  * @param text the sentence's text
  */
-public record Sentence(String text) {}
+public record Sentence(SentenceRef ref, String text) {}

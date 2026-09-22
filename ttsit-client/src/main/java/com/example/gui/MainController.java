@@ -15,6 +15,7 @@ import com.example.enums.Language;
 import com.example.enums.ServerState;
 import com.example.enums.Voice;
 import com.example.record.Sentence;
+import com.example.record.SentenceRef;
 
 import javafx.beans.binding.Bindings;
 import javafx.concurrent.Task;
@@ -28,6 +29,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Path;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.StringConverter;
@@ -77,6 +79,9 @@ public class MainController {
     private TextFlow receivedTextFlow;
 
     @FXML
+    private Path transcriptHighlight;
+
+    @FXML
     private Label speechEyebrow;
 
     @FXML
@@ -101,15 +106,19 @@ public class MainController {
     private static final String HINT_TRANSCRIPT_EMPTY = "Nothing to read. Send text first.";
 
     private Server server;
-    private AudioPlayer audioPlayer;
-    private ReadAloudService readAloudService;
+    private ReadAloudService service;
+    private ReadAloudSession session;
+    private WordHighlighter wordHighlighter;
 
     @FXML
     private void initialize() {
         init();
         this.server = new Server();
-        this.audioPlayer = new AudioPlayer();
-        this.readAloudService = new ReadAloudService(server, audioPlayer);
+
+        AudioPlayer audioPlayer = new AudioPlayer();
+        this.wordHighlighter = new WordHighlighter(receivedTextFlow, transcriptHighlight);
+        this.service = new ReadAloudService(audioPlayer, wordHighlighter);
+        this.session = new ReadAloudSession(server, service);
     }
     
     private void init() {
@@ -131,6 +140,12 @@ public class MainController {
         speechEyebrow.translateYProperty().bind(speechEyebrow.heightProperty().divide(-2));
 
         transcriptPlaceholder.visibleProperty().bind(Bindings.isEmpty(receivedTextFlow.getChildren()));
+
+        /* rangeShape() measures from the flow's content box, the padding is not in it. */
+        transcriptHighlight.layoutXProperty().bind(Bindings.createDoubleBinding(
+                () -> receivedTextFlow.getInsets().getLeft(), receivedTextFlow.insetsProperty()));
+        transcriptHighlight.layoutYProperty().bind(Bindings.createDoubleBinding(
+                () -> receivedTextFlow.getInsets().getTop(), receivedTextFlow.insetsProperty()));
 
         clearTranscriptButton.disableProperty().bind(Bindings.isEmpty(receivedTextFlow.getChildren()));
 
@@ -261,7 +276,10 @@ public class MainController {
 
     @FXML
     private void onSend() {
-        appendReceived(inputTextArea.getText());
+        String inputText = inputTextArea.getText();
+        if (!inputText.isBlank()) {
+            appendReceived(inputTextArea.getText());
+        }
     }
 
     @FXML
@@ -271,55 +289,59 @@ public class MainController {
             return;
         }
 
-        String text = getTextFromFlowtext();
-        if (text.isBlank()) {
+        List<String> text_list = getTextFromFlowtext();
+        if (text_list.isEmpty()) {
             refuseReadAloud(HINT_TRANSCRIPT_EMPTY);
             return;
         }
         Animations.hideHint(readAloudHint);
-        List<Sentence> sentences = splitSentence(text);
+        List<Sentence> sentences = splitSentence(text_list);
 
-        readAloudService.setup(sentences, voiceComboBox.getValue(), speedSpinner.getValue().floatValue(), languageComboBox.getValue());
-        readAloudService.restart();
+        session.start(sentences, voiceComboBox.getValue(), speedSpinner.getValue().floatValue(), languageComboBox.getValue());
 
-        readAloudService.setOnRunning(e -> readAloudButton.setDisable(true));
-        readAloudService.setOnSucceeded(e -> readAloudButton.setDisable(false));
-        readAloudService.setOnFailed(e -> {
+        service.setOnRunning(e -> readAloudButton.setDisable(true));
+        service.setOnSucceeded(e -> readAloudButton.setDisable(false));
+        service.setOnFailed(e -> {
             readAloudButton.setDisable(false);
             Animations.shake(speechControls);
         });
 
-        readAloudService.setOnCancelled(e -> readAloudButton.setDisable(false));
+        service.setOnCancelled(e -> readAloudButton.setDisable(false));
     }
     
-    private List<Sentence> splitSentence(String text) {
+    private List<Sentence> splitSentence(List<String> textList) {
         List<Sentence> sentences = new ArrayList<>();
 
-        BreakIterator it = BreakIterator.getSentenceInstance(Locale.forLanguageTag(languageComboBox.getValue().getTag())); // locale from dc:language
-        it.setText(text);
-        int start = it.first();
-        for (int end = it.next(); end != BreakIterator.DONE; start = end, end = it.next()) {
-            String s = text.substring(start, end).strip();
-            if (!s.isEmpty())
-                sentences.add(new Sentence(s));
-        }
+        for (int i = 0; i < textList.size(); i++) {
+            String text = textList.get(i);
+            BreakIterator it = BreakIterator.getSentenceInstance(Locale.forLanguageTag(languageComboBox.getValue().getTag())); // locale from dc:language
+            it.setText(text);
+            int start = it.first();
+            for (int end = it.next(); end != BreakIterator.DONE; start = end, end = it.next()) {
+                String s = text.substring(start, end).strip();
+                if (!s.isEmpty()) {
+                    int offset = text.indexOf(s, start);
+                    sentences.add(new Sentence(new SentenceRef(i, offset), s));
+                }
+            }
+        }        
         return sentences;
     }
 
-    private String getTextFromFlowtext() {
-        String text = "";
+    private List<String> getTextFromFlowtext() {
+        List<String> text_string = new ArrayList<>();
         List<Node> children = receivedTextFlow.getChildren();
         for (Node node : children) {
             if (node instanceof Text) {
-                text += ((Text) node).getText();
+                text_string.add(((Text) node).getText());
             }
         }
-        return text;
+        return text_string;
     }
 
     @FXML
     private void onClearTranscript() {
         Animations.clearReceived(receivedTextFlow);
-        readAloudService.cancel();
+        session.cancel();
     }
 }

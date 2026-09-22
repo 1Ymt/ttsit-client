@@ -43,6 +43,8 @@
     -color-lamp-failed:      #d9534f;
     -color-text-failed:      #f0857f;
 
+    -color-highlight:        #6b5600;
+
     -fx-base:                     -color-surface;
     -fx-background:               -color-bg;
     -fx-control-inner-background: -color-surface;
@@ -307,6 +309,11 @@
 .transcript-flow {
     -fx-padding: 12 14 12 14;
     -fx-line-spacing: 5px;
+}
+
+.transcript-highlight {
+    -fx-fill: -color-highlight;
+    -fx-stroke: transparent;
 }
 
 .transcript-flow .text,
